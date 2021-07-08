@@ -11,7 +11,7 @@ add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/MP>)
 # Visual Studio: Preselect qolibri as the solution's startup project
 set_property(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" PROPERTY VS_STARTUP_PROJECT qolibri)
 
-project(qolibri VERSION 2.1.3)
+project(qolibri VERSION 2.1.4)
 
 include(GNUInstallDirs)
 
@@ -20,6 +20,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
 find_package(Qt5 COMPONENTS LinguistTools Multimedia Network WebEngine WebEngineWidgets Widgets REQUIRED)
+find_package(ZLIB REQUIRED)
 
 add_executable(qolibri MACOSX_BUNDLE WIN32
     images/qolibri.icns
@@ -104,6 +105,9 @@ add_executable(qolibri MACOSX_BUNDLE WIN32
 set(QOLIBRI_EB_SOURCE_DIR "" CACHE STRING "Optional path to cmake-enabled EB library source tree")
 if(QOLIBRI_EB_SOURCE_DIR)
     add_subdirectory("${QOLIBRI_EB_SOURCE_DIR}" eb)
+    set(EB_LIBRARY eb)
+else()
+    find_library(EB_LIBRARY eb REQUIRED)
 endif()
 
 target_compile_definitions(qolibri PRIVATE QT_USE_QSTRINGBUILDER)
@@ -161,6 +165,6 @@ set_source_files_properties(${TS_FILES} PROPERTIES OUTPUT_LOCATION "${CMAKE_CURR
 qt5_add_translation(QM_FILES ${TS_FILES})
 target_sources(qolibri PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/translations/translations.qrc" ${QM_FILES} ${TS_FILES})
 
-target_link_libraries(qolibri Qt5::Multimedia Qt5::Network Qt5::WebEngine Qt5::WebEngineWidgets Qt5::Widgets eb z)
+target_link_libraries(qolibri Qt5::Multimedia Qt5::Network Qt5::WebEngine Qt5::WebEngineWidgets Qt5::Widgets "${EB_LIBRARY}" ZLIB::ZLIB)
 
 install(TARGETS qolibri DESTINATION "${CMAKE_INSTALL_BINDIR}")
